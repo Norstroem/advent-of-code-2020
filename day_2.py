@@ -1,56 +1,48 @@
-with open('inputs/day_2.txt', 'r') as file:
-    lines = file.readlines()
-
-# Part one
-
-valid_count = 0
-for line in lines:
-    string = line.strip()
-
-    policy = string.split(':')[0]
-    password = string.split(':')[1]
-
-    policy_character = policy.split(' ')[1]
-    policy_count = policy.split(' ')[0]
-
-    policy_count_min = int(policy_count.split('-')[0])
-    policy_count_max = int(policy_count.split('-')[1])
-
-    character_count = 0
-    for character in password:
-        if character == policy_character:
-            character_count += 1
-
-    if character_count >= policy_count_min and character_count <= policy_count_max:
-        valid_count += 1
-
-print(f'Valid number of passwords for part one: {valid_count}')
+import multiprocessing as mp
+from typing import Tuple
 
 
-valid_count = 0
-for line in lines:
-    string = line.strip()
+def extract_password(line: str) -> str:
+    line = line.strip()
+    [_, password] = line.split(':')
+    return password
 
-    policy = string.split(':')[0]
-    password = string.split(':')[1]
 
-    policy_character = policy.split(' ')[1]
-    policy_indices = policy.split(' ')[0]
+def extract_policy(line: str) -> Tuple[str, int, int]:
+    line = line.strip()
+    [policy, _] = line.split(':')
+    [policy_integers, policy_character] = policy.split(' ')
+    [policy_integer_one, policy_integer_two] = policy_integers.split('-')
+    return policy_character, int(policy_integer_one), int(policy_integer_two)
 
-    policy_first_index = int(policy_indices.split('-')[0])
-    policy_second_index = int(policy_indices.split('-')[1])
 
-    first_index_matching = False
-    second_index_matching = False
+def match_character(character: str, reference_character: str) -> bool:
+    return character == reference_character
 
-    character_count = 0
-    for i, character in enumerate(password):
-        if i == policy_first_index and character == policy_character:
-            first_index_matching = True
-        elif i == policy_second_index and character == policy_character:
-            second_index_matching = True
 
-    if first_index_matching != second_index_matching:
-        valid_count += 1
+def verify_policy_one(password: str, policy: Tuple[str, int, int]) -> bool:
+    (policy_character, min_count, max_count) = policy
+    matching_characters = list(map(match_character, list(password), [policy_character]*len(password)))
+    return int(min_count) <= sum(matching_characters) <= int(max_count)
 
-print(f'Valid number of passwords for part two: {valid_count}')
+
+def verify_policy_two(password: str, policy: Tuple[str, int, int]) -> bool:
+    (policy_character, index_one, index_two) = policy
+    first_index_matching = password[index_one] == policy_character
+    second_index_matching = password[index_two] == policy_character
+    return first_index_matching != second_index_matching
+
+
+if __name__ == '__main__':
+    pool = mp.Pool()
+
+    with open('inputs/day_2.txt', 'r') as file:
+        lines = file.readlines()
+    passwords = pool.starmap(extract_password, zip(lines))
+    policies = pool.starmap(extract_policy, zip(lines))
+
+    approved_passwords = pool.starmap(verify_policy_one, zip(passwords, policies))
+    print(f'Valid number of passwords for part one: {sum(approved_passwords)}')
+
+    approved_passwords = pool.starmap(verify_policy_two, zip(passwords, policies))
+    print(f'Valid number of passwords for part two: {sum(approved_passwords)}')

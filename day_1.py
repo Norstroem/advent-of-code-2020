@@ -3,16 +3,19 @@ import numpy as np
 import multiprocessing as mp
 import functools
 
-input = 'inputs/day_1.txt'
+input_path = 'inputs/day_1.txt'
 
-df = pd.read_csv(input, '\n')
-entries = df.iloc[:,0]
+df = pd.read_csv(input_path, '\n')
+entries = df.iloc[:, 0]
+
 
 def add_to_entries(x):
     return x+entries
 
+
 def add_to_entries2(x):
     return map(add_to_entries, x)
+
 
 def search_for_match(x):
     result = np.where(x == 2020)
@@ -20,8 +23,10 @@ def search_for_match(x):
         index = result[0][0]
         return index
 
+
 def search_for_match2(x):
     return list(map(search_for_match, x))
+
 
 if __name__ == '__main__':
     pool = mp.Pool()
