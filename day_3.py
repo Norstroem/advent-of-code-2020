@@ -1,4 +1,5 @@
 import functools
+import multiprocessing as mp
 import numpy as np
 from typing import Tuple
 
@@ -33,8 +34,9 @@ def find_trees(slope: Tuple[int, int]) -> int:
 
 
 if __name__ == '__main__':
+    pool = mp.Pool()
     slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)]
-    tree_list = list(map(find_trees, slopes))
+    tree_list = pool.starmap(find_trees, zip(slopes))
 
     answer = functools.reduce(lambda x, y: x*y, tree_list)
 
