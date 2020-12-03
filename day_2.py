@@ -3,13 +3,11 @@ from typing import Tuple
 
 
 def extract_password(line: str) -> str:
-    line = line.strip()
     [_, password] = line.split(':')
     return password
 
 
 def extract_policy(line: str) -> Tuple[str, int, int]:
-    line = line.strip()
     [policy, _] = line.split(':')
     [policy_integers, policy_character] = policy.split(' ')
     [policy_integer_one, policy_integer_two] = policy_integers.split('-')
@@ -38,6 +36,7 @@ if __name__ == '__main__':
 
     with open('inputs/day_2.txt', 'r') as file:
         lines = file.readlines()
+    lines = list(map(str.strip, lines))
     passwords = pool.starmap(extract_password, zip(lines))
     policies = pool.starmap(extract_policy, zip(lines))
 
