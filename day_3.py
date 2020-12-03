@@ -11,9 +11,7 @@ vertical_range = len(lines)
 
 
 def horizontal_location(x: int) -> int:
-    if x > horizontal_range:
-        x = x % (horizontal_range + 1)
-    return x
+    return x % (horizontal_range + 1)
 
 
 def is_tree(vertical_coordinate: int, horizontal_coordinate: int) -> bool:
