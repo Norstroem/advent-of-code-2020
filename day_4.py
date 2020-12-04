@@ -1,9 +1,34 @@
 import re
+from typing import Dict, List, Tuple
+from functools import reduce
 
 mandatory_fields = ['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid']
 
 
-def validate_field(key: str, value: str) -> bool:
+def flatten(str1: str, str2: str) -> str:
+    if str2.strip() == '':
+        separator = '|'
+    else:
+        separator = ' '
+    return f'{str1.strip()}{separator}{str2.strip()}'
+
+
+def flatten_list_to_dict(dicts: List[Dict]) -> Dict:
+    return reduce(lambda x, y: {**x, **y}, dicts)
+
+
+def exctract_key_value_pair(field: str) -> Dict[str, str]:
+    [key, value] = field.split(':')
+    return {key: value}
+
+
+def extract_passports(string: str) -> List[Dict[str, str]]:
+    fields = string.split(' ')
+    return list(map(exctract_key_value_pair, fields))
+
+
+def validate_field(key_value: Tuple[str, str]) -> bool:
+    (key, value) = key_value
     valid = False
 
     if key == 'byr':  # Birth Year
@@ -44,41 +69,29 @@ def validate_field(key: str, value: str) -> bool:
     return valid
 
 
+def validate_fields(passport: Dict) -> bool:
+    valid_fields = list(map(validate_field, list(passport.items())))
+    return bool(reduce(lambda x, y: x*y, valid_fields))
+
+
+def validate_mandatory_fields(passport: Dict) -> bool:
+    return set(mandatory_fields).issubset(passport.keys())
+
+
+def validate_both(bool1: bool, bool2: bool) -> bool:
+    return bool1 and bool2
+
+
 if __name__ == '__main__':
     with open('inputs/day_4.txt', 'r') as file:
         lines = file.readlines()
-    lines = list(map(str.strip, lines))
+    flattened_passports = reduce(flatten, lines)
+    passport_strings = flattened_passports.split('| ')
+    passports = list(map(extract_passports, passport_strings))
+    passports = list(map(flatten_list_to_dict, passports))
 
-    passports_data = [[]]
-    passport_index = 0
-    for line in lines:
-        if line == '':
-            passports_data.append([])
-            passport_index += 1
-        else:
-            passports_data[passport_index].append(line)
-
-    passports = []
-    for i, passport_data in enumerate(passports_data):
-        passports.append({})
-        for data_line in passport_data:
-            pairs = data_line.split(' ')
-            for pair in pairs:
-                (key, value) = pair.split(':')
-                passports[i][key] = value
-
-    contains_fields_count = 0
-    valid_count = 0
-    for passport in passports:
-        fields_valid = True
-        contains_mandatory_fields = set(mandatory_fields).issubset(passport.keys())
-        for (key, value) in passport.items():
-            if not validate_field(key, value):
-                fields_valid = False
-
-        if contains_mandatory_fields:
-            contains_fields_count += 1
-        if contains_mandatory_fields and fields_valid:
-            valid_count += 1
-    print(f'Part one answer: {contains_fields_count}')
-    print(f'Part two answer: {valid_count}')
+    contains_mandatory_fields = list(map(validate_mandatory_fields, passports))
+    print(f'Part one answer: {sum(contains_mandatory_fields)}')
+    fields_valid = list(map(validate_fields, passports))
+    all_valid = list(map(validate_both, contains_mandatory_fields, fields_valid))
+    print(f'Part two answer: {sum(all_valid)}')
