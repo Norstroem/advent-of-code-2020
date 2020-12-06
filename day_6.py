@@ -18,7 +18,7 @@ def flatten2(str1: str, str2: str) -> str:
     return f'{str1.strip()}{separator}{str2.strip()}'
 
 
-def intersection(sets: List[set]):
+def intersection(sets: List[set]) -> set:
     return reduce(lambda x, y: x.intersection(y), sets)
 
 
