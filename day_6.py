@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     answers2 = reduce(flatten2, lines)
     group_answers = answers2.split('|')
-    group_answers = list(map(lambda x: x.strip().split(' '), group_answers))
-    group_answers_sets = list(map(lambda x: list(map(set, x)), group_answers))
-    intersections = list(map(intersection, group_answers_sets))
-    yes_answers = list(map(len, intersections))
+    group_answers = map(lambda x: x.strip().split(' '), group_answers)
+    group_answers_sets = map(lambda x: map(set, x), group_answers)
+    intersections = map(intersection, group_answers_sets)
+    yes_answers = map(len, intersections)
     print(f'Answer to part two: {sum(yes_answers)}')
