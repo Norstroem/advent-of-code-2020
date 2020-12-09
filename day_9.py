@@ -36,6 +36,8 @@ if __name__ == '__main__':
                 indices = (i, j)
                 done = True
                 break
+            elif sum > invalid_number:
+                break
         if done:
             break
 
